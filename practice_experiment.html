@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>practice_experiment</title>
+    <meta charset="UTF-8">
+    <script src="jspsych.js"></script>
+    <script src="plugins/jspsych-survey-text.js"></script>
+    <script src="plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="plugins/jspsych-audio-button-response.js"></script>
+    <script src="plugins/jspsych-html-button-response.js"></script>
+    <link rel="stylesheet" href="css/jspsych.css"></link>
+  </head>
+  <body></body>
+  <script>
+
+  var images = [
+    'img/buddha.jpg',
+    'img/gorilla.jpg',
+  ];
+  var audio = [
+    'sound/gorilla.wav',
+    'sound/buddha.wav',
+  ];
+
+  var timeline = [];
+
+  var subject_id = {
+    type: 'survey-text',
+    questions: [{prompt: 'Type participant ID:'}],
+    button_label: 'move on >',
+    on_finish: function(data){
+      var subject_id = JSON.parse(data.responses).Q0.trim();
+      jsPsych.data.addProperties({subject_id: subject_id});
+      }
+    }
+    timeline.push(subject_id);
+
+var first_example_stimuli = [
+{stimulus: "img/buddha.jpg", data: {item_code: "buddha"}},
+{stimulus: "img/gorilla.jpg", data: {item_code: "gorilla"}},
+];
+
+ var first_example_trials = {
+   type: 'image-keyboard-response',
+   stimulus: jsPsych.timelineVariable('stimulus'),
+   data: jsPsych.timelineVariable('data'),
+   choices: ['space'],
+   prompt: "<p>Look at the picture.<br> Press space bar to move on.</p>",
+ }
+
+ var first_example_procedure = {
+   timeline: [first_example_trials],
+   timeline_variables: first_example_stimuli,
+   randomize_order: true,
+ }
+ timeline.push(first_example_procedure);
+
+ var second_example_trials = {
+   type: 'survey-text',
+   questions: [
+     {prompt: 'What did you see in the 1st picture?', columns: 20},
+   ],
+  }
+  timeline.push(second_example_trials);
+
+ var third_example_stimuli = [
+   {stimulus: "sound/buddha.wav", choices: ['Gorilla','Buddha']},
+   {stimulus: "sound/gorilla.wav", choices: ['Buddha','Gorilla']},
+ ];
+
+ var third_example_trials = {
+   type: 'audio-button-response',
+   stimulus: jsPsych.timelineVariable('stimulus'),
+   timeline_variables: third_example_stimuli,
+   choices: jsPsych.timelineVariable('choices'),
+   prompt: '<p>Click on the button when you hear the word.</p>',
+  }
+
+ var third_example_procedure = {
+   timeline: [third_example_trials],
+   timeline_variables: third_example_stimuli,
+   randomize_order: false,
+  }
+  timeline.push(third_example_procedure);
+
+ var end_block = {
+    type: 'html-button-response',
+    stimulus: '<p>Click on the button to save your data.</p>',
+    choices: ['save'],
+  }
+  timeline.push(end_block);
+
+  jsPsych.init({
+      timeline: timeline,
+      preload_audio: audio,
+      preload_images: images,
+      on_finish: function() {
+        jsPsych.data.get().localSave('csv','practice_experiment.csv');
+      }
+  });
+</script>
+</html>
