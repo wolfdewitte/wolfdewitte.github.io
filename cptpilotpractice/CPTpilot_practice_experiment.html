@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CPT Pilot Practice</title>
+		<script src="jspsych-6.0.5/jspsych.js"></script>
+		<script src="jspsych-6.0.5/plugins/jspsych-fullscreen.js"></script>
+		<script src="jspsych-6.0.5/plugins/jspsych-survey-text.js"></script>
+		<script src="jspsych-6.0.5/plugins/jspsych-html-button-response.js"></script>
+		<script src="jspsych-6.0.5/plugins/jspsych-audio-button-response.js"></script>
+		<link rel="stylesheet" href="jspsych-6.0.5/css/jspsych.css"></link>
+	</head>
+	<body></body>
+	<script>
+	
+		var timeline = [];
+		
+		var audio = [
+			'audio/acc_r_radio_engdio_eng_r_radio.wav',
+			'audio/acc_v_various_shortb_eng_v_various_vfromvanish.wav',
+			'audio/eng_abuse_accuse_abuse_2.wav',
+			'audio/eng_b_above_acc_b_above_engv.wav',
+			'audio/eng_p_petal_2_petal.wav',
+			'audio/eng_p_push_acc_p_push.wav',
+			'audio/eng_r_runner_2_runner.wav',
+			'audio/eng_v_video_vfromviewer_video.wav',
+		];
+		
+		timeline.push({
+			type: 'fullscreen',
+			fullscreen_mode: true,
+			message: 'Fullscreen Mode ',
+			button_label: 'Activate'
+		});
+		
+		var participantID = {
+			type: 'survey-text',
+			questions: [{
+				prompt: 'Please enter the participant ID number given to you by the researcher:',
+				rows: 1, columns: 30,
+			}],
+			on_finish: function (data) {
+				var subject_id = JSON.parse(data.responses).Q0.trim();
+				jsPsych.data.addProperties({ subject_id: subject_id });
+			}
+		};
+		
+		timeline.push(participantID)
+		
+		var instructions = {
+			type: 'html-button-response',
+			stimulus: "<p>Listen to the two words and indicate whether the first or the second word<br>" +
+					  "is clearly a better, more English-like pronunciation, or if they are both equally fine.</p>" +
+					  "<p>Don't think about it too much. If they sound equally fine, click on <strong>SAME</strong>.</p>" +
+					  "<p>If one of them sounds more English-like, click on the corresponding button, i.e. <strong>FIRST</strong> or <strong>SECOND</strong>.</p>",
+			choices: ['Begin task']
+		}
+		
+		timeline.push(instructions);
+		
+		var stimuli = [
+			{ stimulus: 'audio/acc_r_radio_engdio_eng_r_radio.wav' },
+			{ stimulus: 'audio/acc_v_various_shortb_eng_v_various_vfromvanish.wav' },
+			{ stimulus: 'audio/eng_abuse_accuse_abuse_2.wav' },
+			{ stimulus: 'audio/eng_b_above_acc_b_above_engv.wav' },
+			{ stimulus: 'audio/eng_p_petal_2_petal.wav' },
+			{ stimulus: 'audio/eng_p_push_acc_p_push.wav' },
+			{ stimulus: 'audio/eng_r_runner_2_runner.wav' },
+			{ stimulus: 'audio/eng_v_video_vfromviewer_video.wav' },
+		];
+		
+		var trials = {
+			type: 'audio-button-response',
+			stimulus: jsPsych.timelineVariable('stimulus'),
+			data: jsPsych.timelineVariable('data'),
+			choices: ['FIRST', 'SECOND', 'SAME']
+		}
+		
+		var procedure = {
+			timeline: [trials],
+			timeline_variables: stimuli,
+			randomize_order: true
+		}
+		
+		timeline.push(procedure);
+		
+		var end_block = {
+			type: 'html-button-response',
+			stimulus: '<p>Thank you.<br>Click on the button to save your data.</p>',
+			choices: ['Save']
+		}
+		
+		timeline.push(end_block);
+		
+		jsPsych.init({
+			timeline: timeline,
+			preload_audio: audio,
+			on_finish: function () {
+				jsPsych.data.get().localSave('csv', 'CPT_pilot_practic_results.csv');
+			}
+		});
+	</script>
+</html>
